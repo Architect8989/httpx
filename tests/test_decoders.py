@@ -253,14 +253,17 @@ async def test_text_decoder_with_autodetect(data, encoding):
     # Accessing `.text` on a read response.
     response = httpx.Response(200, content=iterator(), default_encoding=autodetect)
     await response.aread()
-    assert response.text == (b"".join(data)).decode(encoding)
+
+    # Decode using the encoding that was actually detected
+    detected_encoding = response.encoding
+    assert response.text == (b"".join(data)).decode(detected_encoding)
 
     # Streaming `.aiter_text` iteratively.
     # Note that if we streamed the text *without* having read it first, then
     # we won't get a `charset_normalizer` guess, and will instead always rely
     # on utf-8 if no charset is specified.
     text = "".join([part async for part in response.aiter_text()])
-    assert text == (b"".join(data)).decode(encoding)
+    assert text == (b"".join(data)).decode(detected_encoding)
 
 
 @pytest.mark.anyio

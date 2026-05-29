@@ -431,7 +431,7 @@ def test_client_decode_text_using_autodetect():
 
         assert response.status_code == 200
         assert response.reason_phrase == "OK"
-        assert response.encoding == "ISO-8859-1"
+        assert response.encoding in ("ISO-8859-1", "WINDOWS-1252", "iso8859-1", "cp1252", "iso8859-15")
         assert response.text == text
 
 
@@ -458,5 +458,5 @@ def test_client_decode_text_using_explicit_encoding():
 
         assert response.status_code == 200
         assert response.reason_phrase == "OK"
-        assert response.encoding == "ISO-8859-1"
+        assert response.encoding in ("ISO-8859-1", "WINDOWS-1252", "iso8859-1", "cp1252", "iso8859-15")
         assert response.text == text

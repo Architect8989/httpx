@@ -64,6 +64,23 @@ def _is_known_encoding(encoding: str) -> bool:
     return True
 
 
+def _normalize_encoding(encoding: str | None) -> str | None:
+    """
+    Normalize an encoding name to its canonical form.
+    
+    When using chardet (or similar charset detection libraries),
+    encoding names may be returned in non-standard forms (e.g.
+    'iso8859-15' vs 'ISO-8859-1'). This function normalizes
+    the encoding name via Python's codecs registry.
+    """
+    if encoding is None:
+        return None
+    try:
+        return codecs.lookup(encoding).name
+    except LookupError:
+        return None
+
+
 def _normalize_header_key(key: str | bytes, encoding: str | None = None) -> bytes:
     """
     Coerce str/bytes into a strictly byte-wise HTTP header key.
@@ -668,6 +685,9 @@ class Response:
                     encoding = self.default_encoding
                 elif hasattr(self, "_content"):
                     encoding = self.default_encoding(self._content)
+                    # Normalize encoding names from autodetection libraries
+                    # (e.g. chardet may return non-standard names)
+                    encoding = _normalize_encoding(encoding)
             self._encoding = encoding or "utf-8"
         return self._encoding
 
